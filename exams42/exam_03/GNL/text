@@ -1,0 +1,30 @@
+Token Recognition
+The shell reads its input in terms of lines from a file, from a terminal in the case of an interactive shell or from a string in the case of sh -c or system(). The input lines can be of unlimited length. These lines are parsed using two major modes: ordinary token recognition and processing of here-documents.
+
+When an io_here token has been recognised by the grammar (see Shell Grammar ), one or more of the subsequent lines immediately following the next NEWLINE token form the body of one or more here-documents and are parsed according to the rules of Here-document .
+
+When it is not processing an io_here, the shell will break its input into tokens by applying the first applicable rule below to the next character in its input. The token will be from the current position in the input until a token is delimited according to one of the rules below; the characters forming the token are exactly those in the input, including any quoting characters. If it is indicated that a token is delimited, and no characters have been included in a token, processing will continue until an actual token is delimited.
+
+    If the end of input is recognised, the current token will be delimited. If there is no current token, the end-of-input indicator will be returned as the token.
+
+    If the previous character was used as part of an operator and the current character is not quoted and can be used with the current characters to form an operator, it will be used as part of that (operator) token.
+
+    Note that certain combinations of characters are invalid in portable scripts, as shown in the grammar, and that some systems have assigned these combinations (such as |&) as valid control operators. Portable scripts cannot rely on receiving errors in all cases where this specification indicates that a syntax is invalid.
+
+    If the previous character was used as part of an operator and the current character cannot be used with the current characters to form an operator, the operator containing the previous character will be delimited.
+
+    If the current character is backslash, single-quote or double-quote (\, ' or ") and it is not quoted, it will affect quoting for subsequent characters up to the end of the quoted text. The rules for quoting are as described in Quoting . During token recognition no substitutions will be actually performed, and the result token will contain exactly the characters that appear in the input (except for newline character joining), unmodified, including any embedded or enclosing quotes or substitution operators, between the quote mark and the end of the quoted text. The token will not be delimited by the end of the quoted field.
+
+    If the current character is an unquoted "$" or `, the shell will identify the start of any candidates for parameter expansion, command substitution, or arithmetic expansion from their introductory unquoted character sequences: "$" or ${, $( or `, and $((, respectively. The shell will read sufficient input to determine the end of the unit to be expanded (as explained in the cited sections). While processing the characters, if instances of expansions or quoting are found nested within the substitution, the shell will recursively process them in the manner specified for the construct that is found. The characters found from the beginning of the substitution to its end, allowing for any recursion necessary to recognise embedded constructs, will be included unmodified in the result token, including any embedded or enclosing substitution operators or quotes. The token will not be delimited by the end of the substitution.
+
+    If the current character is not quoted and can be used as the first character of a new operator, the current token (if any) will be delimited. The current character will be used as the beginning of the next (operator) token.
+
+    If the current character is an unquoted newline character, the current token will be delimited.
+
+    If the current character is an unquoted blank character, any token containing the previous character is delimited and the current character will be discarded.
+
+    If the previous character was part of a word, the current character will be appended to that word.
+
+    If the current character is a "#", it and all subsequent characters up to, but excluding, the next newline character will be discarded as a comment. The newline character that ends the line is not considered part of the comment. The "#" starts a comment only when it is at the beginning of a token. Since the search for the end-of-comment does not consider an escaped newline character specially, a comment cannot be continued to the next line.
+
+    The current character will be used as the start of a new word. 
